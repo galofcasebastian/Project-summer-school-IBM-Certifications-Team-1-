@@ -1,6 +1,9 @@
 package com.practica.project.controller;
 
 import com.practica.project.dto.RequestDto;
+import com.practica.project.entity.Request;
+//import com.practica.project.exceptions.LessonException;
+import com.practica.project.repository.RequestRepository;
 import com.practica.project.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,9 @@ public class RequestController {
     
     @Autowired
     private RequestService requestService;
+
+    @Autowired
+    private RequestRepository requestRepository;
 
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RequestDto> addRequest(@Valid @RequestBody RequestDto newRequestDto){
@@ -43,9 +49,25 @@ public class RequestController {
         return ResponseEntity.ok().body(requestDtoList);
     }
 
-    @GetMapping(value = "/approvalStatus/{approvalStatus", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/approvalStatus/{approvalStatus}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RequestDto>> getRequestsByApprovalStatus(@PathVariable("approvalStatus") String approvalStatus){
         List<RequestDto> requestDtoList = this.requestService.getAllRequestsByApprovalStatus(approvalStatus);
         return ResponseEntity.ok().body(requestDtoList);
     }
+
+    @GetMapping("/getAllRequests")
+    public List<Request> getAllRequests() {
+        return requestRepository.findAll();
+    }
+
+    /*private void failIfDtoContainsIds(RequestDto requestDto) {
+        if (requestDto.getId() != null) {
+            throw new LessonException(HttpStatus.EXPECTATION_FAILED, "New request should not have an ID!");
+        }
+
+        requestDto.getRequestList().stream()
+                .filter(a -> a.getId() != null)
+                .findFirst()
+                .ifPresent(a -> {throw new LessonException(HttpStatus.EXPECTATION_FAILED, "New address should not contain an ID!");});
+    }*/
 }

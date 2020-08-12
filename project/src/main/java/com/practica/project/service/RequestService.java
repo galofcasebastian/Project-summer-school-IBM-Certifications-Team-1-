@@ -1,18 +1,34 @@
 package com.practica.project.service;
 
 import com.practica.project.dto.RequestDto;
+//import com.practica.project.entity.Applicant;
 import com.practica.project.entity.Request;
 import com.practica.project.mapper.RequestMapper;
 import com.practica.project.repository.RequestRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+//import antlr.StringUtils;
+
 import java.util.List;
 import java.util.Optional;
+import org.modelmapper.ModelMapper;
 
 @Service
 public class RequestService {
 
     private final RequestRepository repository;
     private final RequestMapper mapper;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired 
+    private RequestRepository requestRepository;
+
+    @Autowired
+    private RequestService requestService;
 
     public RequestService(RequestRepository repository, RequestMapper mapper){
         this.repository = repository;
@@ -54,5 +70,33 @@ public class RequestService {
         List<RequestDto> requestDtoList = this.mapper.toDtoList(requestList);
 
         return requestDtoList;
+    }
+
+    public List<RequestDto> getAllRequests() {
+        List<Request> requestList = this.repository.findAll();
+        List<RequestDto> studentDtoList = this.mapper.toDtoList(requestList);
+
+        return studentDtoList;
+    }
+
+    public Request toEntity(RequestDto applicantDto) {
+        Request request = modelMapper.map(applicantDto, Request.class);
+
+        if (request.getId() != null) {
+            Request dbRequest = requestRepository.getOne(request.getId());
+            request.setMyQuarter(dbRequest.getMyQuarter());
+            request.setMyApprovalStatus(dbRequest.getMyApprovalStatus());
+            request.setBusinessJustification(dbRequest.getBusinessJustification());
+        }
+
+        /*if (StringUtils.isNotEmpty(requestDto.getId())) {
+            request.setId(requestDto.getId());
+        }*/
+
+        /*applicantDto.getRequestList().stream()
+                .map(requestService::toEntity)
+                .forEach(request::addRequest);*/
+
+        return request;
     }
 }

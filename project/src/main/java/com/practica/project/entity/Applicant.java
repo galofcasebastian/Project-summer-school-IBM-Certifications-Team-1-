@@ -1,9 +1,16 @@
 package com.practica.project.entity;
 
+import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*; 
+import javax.persistence.*;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Getter @Setter @NoArgsConstructor @EqualsAndHashCode
 @Table(name = "APPLICANTS")
 public class Applicant {
     
@@ -15,60 +22,14 @@ public class Applicant {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name = "BUSINESS", nullable = false)
-    private String businessJustification;
+    @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Request> requestList = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinTable(
-            name = "APPLICANT_CERTIFICATION",
-            joinColumns = @JoinColumn(name = "APPLICANT_ID"),
-            inverseJoinColumns = @JoinColumn(name = "CERTIFICATION_ID"))
-    private Set<Certification> certifications;
+    @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Certification> certificationList = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinTable(
-            name = "APPLICANT_REQUEST",
-            joinColumns = @JoinColumn(name = "APPLICANT_ID"),
-            inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
-    private Set<Request> requests;
-
-    public Integer getId(){
-        return id;
-    }
-
-    public void setId(Integer id){
-        this.id=id;
-    }
-
-    public String getName(){
-        return name;
-    }
-
-    public void setName(String name){
-        this.name=name;
-    }
-
-    public String getBusinessJustification(){
-        return businessJustification;
-    }
-
-    public void setBusinessJustification(String businessJustification){
-        this.businessJustification=businessJustification;
-    }
-
-    public Set<Certification> getCertification(){
-        return certifications;
-    } 
-
-    public void setCertification(Set<Certification> certifications){
-        this.certifications=certifications;
-    }
-
-    public Set<Request> getRequest(){
-        return requests;
-    } 
-
-    public void setRequest(Set<Request> requests){
-        this.requests=requests;
+    public void addRequest(Request newRequest){
+        this.requestList.add(newRequest);
+        newRequest.setApplicant(this);
     }
 }
